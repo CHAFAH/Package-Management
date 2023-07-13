@@ -1,0 +1,23 @@
+#  **<span style="color:green">Prince Chafah Forchu Sani, Aalborg, Denmark.</span>**
+### **<span style="color:green">Contacts: +1437 215 2483<br>**
+### **Email: forchu.cha@gmail.com**
+
+##GIT and GitHUB:
+##### Prerequisite
++ AWS Acccount.
++ Create Security Group and open Required ports.
+   + 22 ..etc
++ Create Redhat EC2 T2.medium Instance with 4GB of RAM.
++ Attach Security Group to EC2 Instance.
++ Install java openJDK 1.8+
+
++Distributed VCM, Source Code Management and Versioning, open Source
+
++Install dependencies
+``` sh
+sudo yum install git nano vim wget unzip -y
+#choco install git for windows
+#apt install git ubuntu
+
+git --version
+```

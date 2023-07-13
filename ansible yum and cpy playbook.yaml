@@ -1,0 +1,46 @@
+# find modules at https://docs.ansible.com/ansible/2.9/modules/list_of_all_modules.html
+# https://docs.ansible.com/ansible/2.9/modules/list_of_all_modules.html
+
+``` sh
+- name: Setup WebServer
+  hosts: app
+  become: yes
+  tasks:
+    - name: install Apache httpd
+      yum:
+       name: httpd
+       state: present
+    - name: Start and Enabe httpd
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+    - name: Copy file
+      copy:
+        src: index.html
+        dest: /var/www/index.html
+        
+- name: Copy hosts file
+  hosts: DBserver
+  become: yes
+  tasks:
+    - name: Copy hosts file
+      copy:
+        src: hosts
+        dest: /home/ec2-user
+
+
+- name: Setup DB Server
+  hosts: all
+  become: yes
+  tasks:
+    - name: install MySQL server
+      yum:
+        name: mariadb-server
+        state: present
+    - name: start and enable server
+      systemd:
+        name: mariadb
+        state: started
+        enabled: yes
+``` 
