@@ -1,0 +1,32 @@
+#!/bin/sh
+echo It is advisable that you use a different server for your Nginx web server.
+echo You will need to add security group and open port 80 with source set at 0.0.0.0/0.
+echo Do you want to continue with your Nginx installation?
+echo Enter 1 for yes and 2 for no.
+read response
+if
+        (( $response == 1 ))
+then
+        echo Installing the EPEL repository...
+        sleep 1
+        sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
+        echo Installing NGINX Open Source...
+        sleep 1
+        sudo yum install nginx -y
+        echo Enabling the nginx service...
+        sleep 1
+        sudo systemctl enable nginx
+        echo Starting the nginx service...
+        sleep 1
+        sudo systemctl start nginx
+        echo Checking the status of the nginx service...
+        sleep 1
+        sudo systemctl status nginx
+        echo Renaming the default nginx conf file...
+        sleep 1
+        sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bkp
+        echo Switching to root user to complete the set-up
+        sudo su root
+else
+        echo Go launch an instance for NGINX
+fi
