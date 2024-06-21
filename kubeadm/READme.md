@@ -47,6 +47,8 @@ Disable swap and modify `/etc/fstab`.
 
 ```bash
 sudo swapoff -a
+```
+```bash
 sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 ```
 
@@ -59,16 +61,21 @@ cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 overlay
 br_netfilter
 EOF
-
+```
+```bash
 sudo modprobe overlay
+```
+```bash
 sudo modprobe br_netfilter
-
+```
+```bash
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-iptables = 1
 net.bridge.bridge-nf-call-ip6tables = 1
 net.ipv4.ip_forward = 1
 EOF
-
+```
+```bash
 sudo sysctl --system
 ```
 
@@ -78,6 +85,8 @@ Install containerd and its dependencies.
 
 ```bash
 sudo apt-get update -y
+```
+```bash
 sudo apt-get install -y ca-certificates curl gnupg lsb-release
 ```
 
@@ -145,7 +154,11 @@ Update apt package index, install kubelet, kubeadm, and kubectl, and pin their v
 
 ```bash
 sudo apt-get update
+```
+```bash
 sudo apt-get install -y kubelet kubeadm kubectl
+```
+```bash
 sudo apt-mark hold kubelet kubeadm kubectl
 ```
 
