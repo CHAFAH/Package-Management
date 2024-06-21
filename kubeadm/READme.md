@@ -36,11 +36,6 @@ Replace `node1` with the appropriate hostname for each node.
 sudo hostnamectl set-hostname master
 sudo su ubuntu
 ```
-## **Disable Swap**:
-   ```bash
-   sudo swapoff -a
-   sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
-   ```
 ### Step 2: Disable Swap & Add Kernel Settings
 
 Disable swap and modify `/etc/fstab`.
