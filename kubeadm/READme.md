@@ -89,6 +89,8 @@ Add Docker’s official GPG key.
 
 ```bash
 sudo mkdir -p /etc/apt/keyrings
+```
+```bash
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 ```
 
@@ -102,6 +104,8 @@ Install containerd.
 
 ```bash
 sudo apt-get update -y
+```
+```bash
 sudo apt-get install -y containerd.io
 ```
 
@@ -121,6 +125,8 @@ Restart and enable containerd service.
 
 ```bash
 sudo systemctl restart containerd
+```
+```bash
 sudo systemctl enable containerd
 ```
 
@@ -130,6 +136,8 @@ Update the apt package index and install packages needed to use the Kubernetes a
 
 ```bash
 sudo apt-get update
+``
+```bash
 sudo apt-get install -y apt-transport-https ca-certificates curl
 ```
 
@@ -161,6 +169,8 @@ Enable and start kubelet service.
 
 ```bash
 sudo systemctl daemon-reload
+```
+```bash
 sudo systemctl start kubelet
 sudo systemctl enable kubelet.service
 ```
