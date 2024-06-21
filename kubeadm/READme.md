@@ -12,6 +12,13 @@
 + 2 Workers  (1 GB, 1 Core)     t2.micro
 + Create Security Group and open required ports for kubernetes.
    + Open all port for this illustration
+   + Control plane
+Protocol	Direction	Port Range	Purpose	Used By
+TCP	Inbound	6443	Kubernetes API server	All
+TCP	Inbound	2379-2380	etcd server client API	kube-apiserver, etcd
+TCP	Inbound	10250	Kubelet API	Self, Control plane
+TCP	Inbound	10259	kube-scheduler	Self
+TCP	Inbound	10257	kube-controller-manager	Self
 + Attach Security Group to EC2 Instance/nodes.
 
 ## Assign hostname &  login as ‘root’ user because the following set of commands need to be executed with ‘sudo’ permissions.
