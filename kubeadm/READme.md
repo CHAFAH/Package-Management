@@ -14,12 +14,12 @@
    + Open all port for this illustration
    + Control plane
 Protocol	Direction	Port Range	Purpose	Used By
-TCP	Inbound	6443	Kubernetes API server	All
-TCP	Inbound	2379-2380	etcd server client API	kube-apiserver, etcd
-TCP	Inbound	10250	Kubelet API	Self, Control plane
-TCP	Inbound	10259	kube-scheduler	Self
-TCP	Inbound	10257	kube-controller-manager	Self
-+ Attach Security Group to EC2 Instance/nodes.
++ TCP	Inbound	6443	Kubernetes API server	All
++ TCP	Inbound	2379-2380	etcd server client API	kube-apiserver, etcd
++ TCP	Inbound	10250	Kubelet API	Self, Control plane
++ TCP	Inbound	10259	kube-scheduler	Self
++ TCP	Inbound	10257	kube-controller-manager	Self
+
 
 ## Assign hostname &  login as ‘root’ user because the following set of commands need to be executed with ‘sudo’ permissions.
 ```sh
