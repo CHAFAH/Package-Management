@@ -27,152 +27,224 @@ Protocol	Direction	Port Range	Purpose	Used By
 
 
 ## Assign hostname &  login as ‘root’ user because the following set of commands need to be executed with ‘sudo’ permissions.
-```sh
-sudo hostnamectl set-hostname master
-sudo su ubuntu
+
+Understood, I'll format the `README.md` with individual sections for each step with commands that you can copy and paste separately.
+
+### README.md
+
+```markdown
+# Kubernetes Cluster Setup with kubeadm
+
+This guide provides the commands to set up a Kubernetes cluster using `kubeadm` on Ubuntu. Follow the steps below to configure the nodes.
+
+## Prerequisites
+
+1. **Ubuntu Instances**:
+   - Three Ubuntu instances (one control plane node and two worker nodes).
+   - Ensure each instance has at least 2 CPUs and 2GB of RAM.
+
+2. **Network Connectivity**:
+   - Ensure all nodes can communicate with each other over the network.
+
+3. **User Privileges**:
+   - Run the following commands as a user with `sudo` privileges.
+
+4. **Disable Swap**:
+   ```bash
+   sudo swapoff -a
+   sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+   ```
+
+## Steps
+
+### Step 1: Set the Hostname
+
+Replace `node1` with the appropriate hostname for each node.
+
+```bash
+sudo hostnamectl set-hostname node1
 ```
 
-``` sh
-#!/bin/bash
-# common.sh
-# copy this script and run in all master and worker nodes
-#i1) Switch to root user [ sudo -i]
+### Step 2: Disable Swap & Add Kernel Settings
 
-sudo hostnamectl set-hostname  node1
+Disable swap and modify `/etc/fstab`.
 
-#2) Disable swap & add kernel settings
+```bash
+sudo swapoff -a
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+```
 
-swapoff -a
-sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+### Step 3: Load Kernel Modules and Configure Sysctl
 
+Load necessary kernel modules and configure sysctl settings.
 
-#3) Add  kernel settings & Enable IP tables(CNI Prerequisites)
-
+```bash
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 overlay
 br_netfilter
 EOF
 
-modprobe overlay
-modprobe br_netfilter
+sudo modprobe overlay
+sudo modprobe br_netfilter
 
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
-net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-iptables = 1
 net.bridge.bridge-nf-call-ip6tables = 1
-net.ipv4.ip_forward                 = 1
+net.ipv4.ip_forward = 1
 EOF
 
-sysctl --system
+sudo sysctl --system
+```
 
-#4) Install containerd run time
+### Step 4: Install Containerd Runtime
 
-#To install containerd, first install its dependencies.
+Install containerd and its dependencies.
 
-apt-get update -y
-apt-get install ca-certificates curl gnupg lsb-release -y
+```bash
+sudo apt-get update -y
+sudo apt-get install -y ca-certificates curl gnupg lsb-release
+```
 
-#Note: We are not installing Docker Here.Since containerd.io package is part of docker apt repositories hence we added docker repository & it's key to download and install containerd.
-# Add Docker’s official GPG key:
+Add Docker’s official GPG key.
+
+```bash
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+```
 
-#Use follwing command to set up the repository:
+Set up the Docker repository.
 
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```bash
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
 
-# Install containerd
+Install containerd.
 
-apt-get update -y
-apt-get install containerd.io -y
+```bash
+sudo apt-get update -y
+sudo apt-get install -y containerd.io
+```
 
-# Generate default configuration file for containerd
+Generate the default configuration file for containerd.
 
-#Note: Containerd uses a configuration file located in /etc/containerd/config.toml for specifying daemon level options.
-#The default configuration can be generated via below command.
+```bash
+sudo containerd config default | sudo tee /etc/containerd/config.toml
+```
 
-containerd config default > /etc/containerd/config.toml
+Update containerd configuration to use systemd as the cgroup driver.
 
-# Run following command to update configure cgroup as systemd for contianerd.
+```bash
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+```
 
-sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
+Restart and enable containerd service.
 
-# Restart and enable containerd service
+```bash
+sudo systemctl restart containerd
+sudo systemctl enable containerd
+```
 
-systemctl restart containerd
-systemctl enable containerd
+### Step 5: Install kubeadm, kubelet, and kubectl
 
-#5) Installing kubeadm, kubelet and kubectl
+Update the apt package index and install packages needed to use the Kubernetes apt repository.
 
-# Update the apt package index and install packages needed to use the Kubernetes apt repository:
+```bash
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+```
 
-apt-get update
-apt-get install -y apt-transport-https ca-certificates curl
+Download the Google Cloud public signing key.
 
-# Download the Google Cloud public signing key:
-
+```bash
 curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+```
 
-# Add the Kubernetes apt repository:
+Add the Kubernetes apt repository.
 
+```bash
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-
-# Update apt package index, install kubelet, kubeadm and kubectl, and pin their version:
-
-apt-get update
-apt-get install -y kubelet kubeadm kubectl
-
-# apt-mark hold will prevent the package from being automatically upgraded or removed.
-
-apt-mark hold kubelet kubeadm kubectl
-
-# Enable and start kubelet service
-
-systemctl daemon-reload
-systemctl start kubelet
-systemctl enable kubelet.service
-```
-## Initialised the control plane in the master node as the root user.
-``` sh
-# Initialize Kubernetes control plane by running the below commond as root user.
-sudo kubeadm init
 ```
 
-## exit as root user 
-```sh
-sudo su - ubuntu
+Update apt package index, install kubelet, kubeadm, and kubectl, and pin their versions.
+
+```bash
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
 ```
 
-## execute the below commands as a normal ubuntu user
-```sh 
+Enable and start kubelet service.
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start kubelet
+sudo systemctl enable kubelet.service
+```
+
+### Step 6: Initialize the Control Plane Node
+
+On the control plane node, run:
+
+```bash
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=<control-plane-ip>
+```
+
+Set up kubeconfig for the `ubuntu` user:
+
+```bash
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
-## To verify, if kubectl is working or not, run the following command.
-kubectl get pods -A
-```sh
-#deploy the network plugin - weave network and verify
-kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
-kubectl get pods -A
-kubectl get node
-```
-## Copy kubeadm join token from the master and execute in Worker Nodes to join to cluster
-```sh
-kubeadm join 172.31.10.12:6443 --token cdm6fo.dhbrxyleqe5suy6e \
-        --discovery-token-ca-cert-hash sha256:1fc51686afd16c46102c018acb71ef9537c1226e331840e7d401630b96298e7d
+
+### Step 7: Install Pod Network Add-on
+
+Install the Flannel network add-on:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 ```
 
-##  Generate the master join token on the master node
-```sh
-kubeadm token create --print-join-command
-``` 
-##  Copy the token and run it on worker nodes to add them to the control plane
-# Replace the token below with yours. This step is important when you restart your nodes
-```sh
-kubeadm join 172.31.10.12:6443 --token cdm6fo.dhbrxyleqe5suy6e \
-        --discovery-token-ca-cert-hash sha256:1fc51686afd16c46102c018acb71ef9537c1226e331840e7d401630b96298e7d
+### Step 8: Join Worker Nodes
+
+On each worker node, run the command provided by the `kubeadm init` output on the control plane node. The command will look something like this:
+
+```bash
+sudo kubeadm join <control-plane-ip>:6443 --token <token> --discovery-token-ca-cert-hash sha256:<hash>
+```
+
+### Step 9: Verify the Cluster
+
+On the control plane node, verify that all nodes are joined and ready:
+
+```bash
+kubectl get nodes
+```
+
+### Step 10: Deploy NGINX Pod
+
+Create a deployment for NGINX:
+
+```bash
+kubectl create deployment nginx --image=nginx
+kubectl expose deployment nginx --port=80 --type=NodePort
+```
+
+### Step 11: Access NGINX
+
+Get the NodePort assigned to the NGINX service:
+
+```bash
+kubectl get svc nginx
+```
+
+Access NGINX using the NodePort and the IP address of any node in the cluster:
+
+```
+http://<node-ip>:<node-port>
+```
+
+This concludes the steps to set up a Kubernetes cluster with `kubeadm`, deploy an NGINX pod, and access it via a browser.
 ```
 
 
