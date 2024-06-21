@@ -26,35 +26,6 @@ Protocol	Direction	Port Range	Purpose	Used By
 + TCP	Inbound	30000-32767	NodePort Services†	All
 
 
-## Assign hostname &  login as ‘root’ user because the following set of commands need to be executed with ‘sudo’ permissions.
-
-Understood, I'll format the `README.md` with individual sections for each step with commands that you can copy and paste separately.
-
-### README.md
-
-```markdown
-# Kubernetes Cluster Setup with kubeadm
-
-This guide provides the commands to set up a Kubernetes cluster using `kubeadm` on Ubuntu. Follow the steps below to configure the nodes.
-
-## Prerequisites
-
-1. **Ubuntu Instances**:
-   - Three Ubuntu instances (one control plane node and two worker nodes).
-   - Ensure each instance has at least 2 CPUs and 2GB of RAM.
-
-2. **Network Connectivity**:
-   - Ensure all nodes can communicate with each other over the network.
-
-3. **User Privileges**:
-   - Run the following commands as a user with `sudo` privileges.
-
-4. **Disable Swap**:
-   ```bash
-   sudo swapoff -a
-   sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
-   ```
-
 ## Steps
 
 ### Step 1: Set the Hostname
@@ -62,9 +33,14 @@ This guide provides the commands to set up a Kubernetes cluster using `kubeadm` 
 Replace `node1` with the appropriate hostname for each node.
 
 ```bash
-sudo hostnamectl set-hostname node1
+sudo hostnamectl set-hostname master
+sudo su ubuntu
 ```
-
+## **Disable Swap**:
+   ```bash
+   sudo swapoff -a
+   sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+   ```
 ### Step 2: Disable Swap & Add Kernel Settings
 
 Disable swap and modify `/etc/fstab`.
