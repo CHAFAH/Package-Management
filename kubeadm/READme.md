@@ -12,14 +12,14 @@
 + 2 Workers  (1 GB, 1 Core)     t2.micro
 + Create Security Group and open required ports for kubernetes.
    + Open all port for this illustration
-  *Control plane*
+# *Control plane*
 Protocol	Direction	Port Range	Purpose	Used By
 + TCP	Inbound	6443	Kubernetes API server	All
 + TCP	Inbound	2379-2380	etcd server client API	kube-apiserver, etcd
 + TCP	Inbound	10250	Kubelet API	Self, Control plane
 + TCP	Inbound	10259	kube-scheduler	Self
 + TCP	Inbound	10257	kube-controller-manager	Self
-  *Worker node(s)*
+ # *Worker node(s)*
 + Protocol	Direction	Port Range	Purpose	Used By
 + TCP	Inbound	10250	Kubelet API	Self, Control plane
 + TCP	Inbound	10256	kube-proxy	Self, Load balancers
